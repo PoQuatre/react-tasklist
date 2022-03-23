@@ -1,6 +1,6 @@
 import { createContext, useState } from 'react';
 
-import { TaskList } from 'components';
+import { TaskCreation, TaskList } from 'components';
 import type { ITask, StateFrom } from 'types';
 
 export const TasksContext = createContext<StateFrom<ITask[]>>([[], () => {}]);
@@ -13,6 +13,7 @@ export const App = () => {
 
   return (
     <TasksContext.Provider value={[tasks, setTasks]}>
+      <TaskCreation />
       <TaskList />
     </TasksContext.Provider>
   );
