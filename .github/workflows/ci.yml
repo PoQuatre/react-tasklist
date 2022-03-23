@@ -1,0 +1,154 @@
+name: CI 🏗️
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['*.md']
+  pull_request:
+    branches: [main]
+    paths-ignore: ['*.md']
+
+jobs:
+  nvm:
+    name: Get Node Version 🏷️
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.nvm.outputs.version }}
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - id: nvm
+        name: Get Node Version 🏷️
+        run: echo "::set-output name=version::$(cat .nvmrc)"
+
+  typecheck:
+    name: Type Check 🚨
+    needs: nvm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm 📐
+        uses: pnpm/action-setup@v2
+        with:
+          version: 6
+
+      - name: Setup Node 📏
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ needs.nvm.outputs.version }}
+          cache: pnpm
+
+      - name: Install Dependencies 📦
+        run: pnpm install
+
+      - name: Run Type Checker 🚨
+        run: pnpm typecheck
+
+  lint:
+    name: Lint 🚦
+    needs: nvm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm 📐
+        uses: pnpm/action-setup@v2
+        with:
+          version: 6
+
+      - name: Setup Node 📏
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ needs.nvm.outputs.version }}
+          cache: pnpm
+
+      - name: Install Dependencies 📦
+        run: pnpm install
+
+      - name: Run ESLint 🚦
+        run: pnpm lint:eslint
+
+      - name: Run Stylelint 🚦
+        run: pnpm lint:stylelint
+
+  format:
+    name: Format 🪞
+    needs: nvm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm 📐
+        uses: pnpm/action-setup@v2
+        with:
+          version: 6
+
+      - name: Setup Node 📏
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ needs.nvm.outputs.version }}
+          cache: pnpm
+
+      - name: Install Dependencies 📦
+        run: pnpm install
+
+      - name: Run Prettier 🪞
+        run: pnpm format
+
+  build:
+    name: Build 👷
+    needs: [nvm, typecheck, lint, format]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm 📐
+        uses: pnpm/action-setup@v2
+        with:
+          version: 6
+
+      - name: Setup Node 📏
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ needs.nvm.outputs.version }}
+          cache: pnpm
+
+      - name: Install Dependencies 📦
+        run: pnpm install
+
+      - name: Build 🛠️
+        run: pnpm build:ci
+
+      - name: Upload Artifact ⬆️
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+  deploy:
+    name: Deploy 🚀
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Download Artifact ⬇
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        with:
+          branch: gh-pages
+          folder: dist
