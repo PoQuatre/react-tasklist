@@ -1,8 +1,7 @@
 {
-  "name": "react-template-pnpm",
+  "name": "react-tasklist",
   "version": "0.1.0",
-  "description": "An advanced React template using pnpm",
-  "repository": "https://github.com/PoQuatre/react-template-pnpm.git",
+  "repository": "https://github.com/PoQuatre/react-tasklist.git",
   "author": "PoQuatre <leflem.mateo2002@gmail.com>",
   "license": "MIT",
   "private": true,
@@ -17,7 +16,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:ci": "vite build --base=/react-template-pnpm/",
+    "build:ci": "vite build --base=/react-tasklist/",
     "preview": "vite preview",
     "typecheck": "tsc",
     "format": "prettier --check \"**/*.{js,jsx,ts,tsx,json,html,md,svg,yml}\"",
