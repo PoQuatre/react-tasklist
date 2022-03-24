@@ -1,4 +1,7 @@
+import { useContext } from 'react';
 import { useForm } from 'react-hook-form';
+
+import { TasksContext } from 'App';
 
 interface FormFields {
   title: string;
@@ -6,14 +9,24 @@ interface FormFields {
 }
 
 export const TaskCreation = () => {
+  const [_tasks, setTasks] = useContext(TasksContext);
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<FormFields>();
 
-  // eslint-disable-next-line no-console
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const onSubmit = handleSubmit(({ title, priority }) => {
+    setTasks((tasks) => {
+      const id = tasks
+        .map((task) => task.id)
+        .reduce((maxId, currentId) => Math.max(maxId, currentId + 1));
+      return [...tasks, { id, title, priority }];
+    });
+
+    reset();
+  });
 
   return (
     <>
